@@ -1,13 +1,77 @@
 'use strict';
 
-const STORE = [
-  {name: "apples", checked: false},
-  {name: "oranges", checked: false},
-  {name: "milk", checked: true},
-  {name: "bread", checked: false}
-];
+
+//DATABASE
+
+const STORE = {
+  items: [
+    {name: "apples", checked: false},
+    {name: "oranges", checked: false},
+    {name: "milk", checked: true},
+    {name: "bread", checked: false}
+  ],
+  showChecked: false
+};
+  
 
 
+
+
+
+/***************************USER INPUT*******************************/
+
+
+//TAKES IN USER INPUT VALUE, resets label to empty--------------------
+
+//Calls addItemToShoppingList so it can store value in database
+//Calls renderShoppingList to update the list
+
+//--------------------------------------------------------------------
+
+function handleNewItemSubmit() {
+  $('#js-shopping-list-form').submit(function(event) {
+    event.preventDefault();
+
+    if ($('.js-shopping-list-entry').val() === '') return; //prevents user from being able to add empty item (ex: '')
+
+    else {
+      console.log('`handleNewItemSubmit` ran');
+      const newItemName = $('.js-shopping-list-entry').val();
+      $('.js-shopping-list-entry').val('');
+      addItemToShoppingList(newItemName);
+      renderShoppingList();
+    }
+    
+  });
+}
+
+
+//Stores user input in database, defaults to unchecked
+function addItemToShoppingList(itemName) {
+  console.log(`Adding "${itemName}" to shopping list`);
+  STORE.push({name: itemName, checked: false});
+}
+
+
+
+
+
+
+
+
+//check if checkbox is checked
+
+// function isChecked() {
+
+
+
+
+
+
+/*************************HANDLING HTML*****************************/
+
+
+//Generates EACH list items HTML
 function generateItemElement(item, itemIndex, template) {
   return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
@@ -24,6 +88,14 @@ function generateItemElement(item, itemIndex, template) {
 }
 
 
+
+//PRODUCES FULL HTML STRING OF SHOPPING LIST------------------------
+
+//Calls generateItemElement (generates one item at a time)
+//      joins indidvidual items into full HTML string
+
+//------------------------------------------------------------------
+
 function generateShoppingItemsString(shoppingList) {
   console.log("Generating shopping list element");
 
@@ -33,53 +105,85 @@ function generateShoppingItemsString(shoppingList) {
 }
 
 
+//DELIVERS HTML TO DOM----------------------------------------------
+
+//Calls generateShoppingItemsString to create full HTML for list
+
+//------------------------------------------------------------------
+
 function renderShoppingList() {
-  // render the shopping list in the DOM
+ 
   console.log('`renderShoppingList` ran');
-  const shoppingListItemsString = generateShoppingItemsString(STORE);
+
+  let checkedListItems = [...STORE.items];
+  if(STORE.showChecked) {
+    checkedListItems = checkedListItems.filter(item => item.checked); //checks if each item has checked === true property and stores in array
+  }
+
 
   // insert that HTML into the DOM
-  $('.js-shopping-list').html(shoppingListItemsString);
+  $('.js-shopping-list').html(generateShoppingItemsString(checkedListItems));
 }
 
 
-function addItemToShoppingList(itemName) {
-  console.log(`Adding "${itemName}" to shopping list`);
-  STORE.push({name: itemName, checked: false});
-}
 
-function handleNewItemSubmit() {
-  $('#js-shopping-list-form').submit(function(event) {
-    event.preventDefault();
-    console.log('`handleNewItemSubmit` ran');
-    const newItemName = $('.js-shopping-list-entry').val();
-    $('.js-shopping-list-entry').val('');
-    addItemToShoppingList(newItemName);
-    renderShoppingList();
-  });
-}
 
+/*************************TOGGLES**********************************/
+
+
+//CHECKS & UNCHECKS ITEM IN LIST--------------------------------------
+
+//Calls toggleCheck to switch the checked state
+
+//--------------------------------------------------------------------
 
 function handleItemCheckClicked() {
-  $('.js-shopping-list').on('click', `.js-item-toggle`, event => {
+  $('.js-shopping-list').on('click', '.js-item-toggle', event => {
     console.log('`handleItemCheckClicked` ran');
+
+    const itemIndex = $(event.currentTarget).closest('li').attr('data-item-index');
+
+    toggleCheck(itemIndex);
+    renderShoppingList();
+
   });
 }
 
 
+//Changes checked property of item in STORE to the opposite of what it currently is 
+//(ex: if item.checked === false, toggleCheck will change it to true and vice versa)
+function toggleCheck(index) {
+
+  //console.log(STORE[index]);
+  STORE.items[index].checked = !STORE.items[index].checked;  
+}
+
+
+//DELETES ITEM FROM SHOPPING LIST--------------------------------------------------
+
 function handleDeleteItemClicked() {
-  // this function will be responsible for when users want to delete a shopping list
-  // item
+
   $('.shopping-list').on('click','.js-item-delete', function(event){
     $(this).closest('li').remove();
   });
-  console.log('`handleDeleteItemClicked` ran')
+  console.log('`handleDeleteItemClicked` ran');
 }
 
-// this function will be our callback when the page loads. it's responsible for
-// initially rendering the shopping list, and activating our individual functions
-// that handle new item submission and user clicks on the "check" and "delete" buttons
-// for individual shopping list items.
+
+
+
+/**********************************************************************************/
+
+
+//CALLBACK FUNCTION WHEN PAGE LOADS-------------------------------------------------
+
+//Calls renderShoppingList to display HTML to DOM
+//Calls handleNewItemSubmit to intake value inputted by user to our database
+//Calls handleItemCheckClicked to toggle checked items from list
+//Calls handleDeleteItemClicked to delete items from list
+
+//----------------------------------------------------------------------------------
+
 function handleShoppingList() {
   renderShoppingList();
   handleNewItemSubmit();
@@ -87,5 +191,5 @@ function handleShoppingList() {
   handleDeleteItemClicked();
 }
 
-// when the page loads, call `handleShoppingList`
+//When the page loads, calls handleShoppingList
 $(handleShoppingList);
