@@ -61,9 +61,10 @@ function addItemToShoppingList(itemName) {
 
 //check if checkbox is checked
 
-// function isChecked() {
-
-
+function isChecked() {
+  $('.switch').change(() => STORE.showChecked = true);
+  console.log(STORE.showChecked);
+}
 
 
 
@@ -189,6 +190,7 @@ function handleShoppingList() {
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
+  isChecked();
 }
 
 //When the page loads, calls handleShoppingList
